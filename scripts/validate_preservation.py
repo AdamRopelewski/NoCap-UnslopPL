@@ -17,7 +17,7 @@ import sys
 import json
 import re
 from typing import TypedDict
-from _lang import detect_language
+from _lang import detect_language, polish_matching_view
 
 # Import constraint extraction
 from extract_constraints import extract_constraints, Constraint, POLISH_PATTERNS
@@ -165,7 +165,8 @@ def find_constraint_in_text(constraint: Constraint, text: str) -> bool:
     value = constraint["value"]
     ctype = constraint["type"]
     if ctype in ("pl_quantity", "pl_currency", "pl_decimal"):
-        return any(m.group() == value for m in re.finditer(POLISH_PATTERNS[ctype], text))
+        return any(text[m.start():m.end()] == value for m in re.finditer(
+            polish_matching_view(POLISH_PATTERNS[ctype]), polish_matching_view(text)))
     if ctype.startswith("pl_"):
         return re.search(r"(?<!\w)" + re.escape(value) + r"(?!\w)", text) is not None
     normalized_value = normalize_value(value)
@@ -328,7 +329,9 @@ def semantic_drift_warnings(original: str, transformed: str, language: str | Non
             "attribution": r"\b(?:według|zdaniem|powiedział|powiedziała|twierdzi|deklaruje)\b",
         }
         from collections import Counter
+        o, t = polish_matching_view(o), polish_matching_view(t)
         for kind, pattern in markers.items():
+            pattern = polish_matching_view(pattern)
             if Counter(re.findall(pattern, o)) != Counter(re.findall(pattern, t)):
                 out.append(f"Polish {kind} changed: review meaning against the source.")
         out.append("Polish edit requires agent review of roles, owners, attribution and meaning; "
@@ -345,10 +348,12 @@ def validate_preservation(
     """Validate that all constraints are preserved in transformed text."""
 
     language = detect_language(original_text, language)
+    if language == "unknown":
+        language = None
     if constraints is None:
         constraints = extract_constraints(original_text, language)
-    elif language == "pl":
-        # Cached English constraints can omit Polish quantities and exact surfaces.
+    else:
+        # Cached constraints can omit Polish quantities and numeric currency.
         constraints = constraints + [c for c in extract_constraints(original_text, language)
                                      if c["type"].startswith("pl_") and c not in constraints]
 

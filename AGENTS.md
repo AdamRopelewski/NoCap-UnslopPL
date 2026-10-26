@@ -8,7 +8,7 @@ before changing shared helpers.
 Keep `upstream/unslop` and `research/` untouched. Preserve user edits and the Git index. Leave commits and staging to the
 user. Preserve attribution and license declarations; add no inferred license.
 
-For v0.1, use one assert-based smoke check and fixed English CLI comparisons
+For v0.2, use one assert-based smoke check and fixed English CLI comparisons
 against upstream when the comparison checkout exists; report skipped comparisons
 when absent. Compile/import touched scripts without bytecode artifacts.
 Run touched CLI help and `git diff --check`. Verify upstream SHA/status and the

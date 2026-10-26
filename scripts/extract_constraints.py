@@ -18,7 +18,7 @@ import sys
 import re
 import json
 from typing import TypedDict
-from _lang import detect_language
+from _lang import detect_language, polish_matching_view
 
 
 class Constraint(TypedDict):
@@ -92,7 +92,7 @@ PATTERNS: dict[str, str] = {
 }
 
 # Exact surfaces protect Polish punctuation and magnitude without converting numbers.
-_PL_NUMBER = r"[-−]?(?:\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:,\d+)?"
+_PL_NUMBER = r"[+−-]?(?:\d{1,3}(?:[ \u00a0\u202f]\d{3})+|\d+)(?:,\d+)?"
 # shortcut: listed units and adjacent qualifiers only; review other quantity phrasing.
 _PL_QUANTITY = (
     rf"(?i:(?<![\w,−+\-])(?:(?:ponad|powyżej|poniżej|około|dokładnie|co najmniej|"
@@ -102,7 +102,7 @@ _PL_QUANTITY = (
 )
 POLISH_PATTERNS = {
     "pl_quantity": _PL_QUANTITY,
-    "pl_currency": rf"(?<![\w,−+\-]){_PL_NUMBER}[ \u00a0\u202f]*(?:(?:tys\.|mln|mld)[ \u00a0\u202f]*)?(?:zł|PLN)(?!\w)",
+    "pl_currency": rf"(?<![\w,−+\-]){_PL_NUMBER}[ \u00a0\u202f]*(?:(?:tys\.|mln|mld)[ \u00a0\u202f]*)?(?i:zł|PLN)(?!\w)",
     "pl_decimal": rf"(?<![\w,−+\-]){_PL_NUMBER}(?:[ \u00a0\u202f]*(?:%|tys\.|mln|mld))?(?![\w,])",
     "pl_date": r"(?i:\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{4}\b|\b\d{1,2}\s+(?:stycznia|lutego|marca|kwietnia|maja|czerwca|lipca|sierpnia|września|października|listopada|grudnia)\s+\d{4}\b)",
     "pl_reference": r"(?i:(?<!\w)(?:art\.|ust\.|pkt|rozdział|tabela|rys\.|§)\s*\d+[a-z]?(?:[.(]\d+\)?)*)",
@@ -123,12 +123,15 @@ def extract_constraints(text: str, language: str | None = None) -> list[Constrai
     constraints: list[Constraint] = []
     seen_spans: set[tuple[int, int]] = set()
 
-    if detect_language(text, language) == "pl":
-        for kind, pattern in POLISH_PATTERNS.items():
-            for match in re.finditer(pattern, text):
-                constraints.append({"type": kind, "value": match.group(),
-                                    "start": match.start(), "end": match.end()})
-                seen_spans.add((match.start(), match.end()))
+    route = detect_language(text, language)
+    view = polish_matching_view(text)
+    for kind, pattern in POLISH_PATTERNS.items():
+        if route != "pl" and kind != "pl_currency":
+            continue
+        for match in re.finditer(polish_matching_view(pattern), view):
+            constraints.append({"type": kind, "value": text[match.start():match.end()],
+                                "start": match.start(), "end": match.end()})
+            seen_spans.add((match.start(), match.end()))
 
     # Extract pattern-based constraints
     for constraint_type, pattern in PATTERNS.items():

@@ -89,6 +89,12 @@ acknowledge context and meaning review with `check_suggestions.py --language pl
 --reviewed` after resolving confirmed defects and recording protections. Treat every `pl_*` phrase hit as a candidate; protect valid literal,
 quoted, technical, modal and register-dependent uses after context review.
 Review code and quotations against the source even when the scanner masks them.
+ASCII Polish follows the same review and preservation branch. Matching maps
+Polish letters one-to-one without changing the source. Bounded inflections stay
+soft candidates. Local greeting, instruction, role-definition and legal-notice
+protections apply only to the matched phrase; inspect the rest of the passage.
+Infer register from the source and medium. Ambiguous uses remain candidates
+for agent review; preserve conditions, obligations and voice.
 Report English Flesch, structure, silhouette, rubric thresholds and voice scores
 as unavailable for Polish. Skip those gates, structure-climb and voice tooling
 for this branch. Never normalize numbers or typography as an automatic repair.

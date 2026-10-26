@@ -28,7 +28,7 @@ from typing import TypedDict
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from _lang import detect_language
+from _lang import detect_language, polish_matching_view
 from _lang import (  # noqa: E402
     ENGLISH_FUNCTION_WORDS,
     english_function_share,
@@ -736,34 +736,62 @@ def scan_for_violations(text: str, include_quoted: bool = False, language: str |
 
 
 # Every Polish row is a candidate, including praise and register conventions.
+# Keys are bounded phrase regexes; this is the sole Polish candidate catalog.
 POLISH_PHRASES = {
     "warto zauważyć": "pl_empty_framing",
     "warto podkreślić": "pl_empty_framing",
     "należy zaznaczyć": "pl_empty_framing",
     "w dzisiejszym dynamicznym świecie": "pl_empty_framing",
-    "odgrywa kluczową rolę": "pl_emphasis",
+    r"odgrywa(?:ją|ł|ła|ły|li)? kluczową rolę": "pl_emphasis",
+    r"kluczowa rola": "pl_emphasis",
     "wykorzystać synergię": "pl_jargon",
     "uwolnić potencjał": "pl_jargon",
-    "zaadresować problem": "pl_calque",
+    r"zaadresować (?:problem(?:y)?|kwestię|kwestie)": "pl_calque",
+    r"zaadresowania (?:problemu|problemów|kwestii)": "pl_calque",
     "jako model językowy": "pl_chatbot",
     "mam nadzieję, że ta odpowiedź": "pl_chatbot",
     "oto poprawiona wersja": "pl_chatbot",
-    "przełomowe rozwiązanie": "pl_praise",
-    "kompleksowe podejście": "pl_praise",
+    r"przełomow(?:e rozwiązanie|ego rozwiązania|ym rozwiązaniem)": "pl_praise",
+    r"kompleksow(?:e podejście|ego podejścia|ym podejściem)": "pl_praise",
     "niniejszym informujemy": "pl_formality",
     "szanowni państwo": "pl_formality",
 }
 
 
+def _suppress_polish_match(text: str, match: re.Match, category: str) -> bool:
+    """Protect local register/definition cues, leaving other hits for review."""
+    phrase = match.group()
+    tail = text[match.end():]
+    line_start = text.rfind("\n", 0, match.start()) + 1
+    if category == "pl_empty_framing" and re.fullmatch("nalezy zaznaczyc", phrase, re.I):
+        return bool(re.match(r"\s+(?:pole wyboru|checkbox)\b", tail, re.I))
+    if category == "pl_formality":
+        if re.fullmatch("szanowni panstwo", phrase, re.I):
+            return (not text[line_start:match.start()].strip() and
+                    bool(re.match(r"[ \t]*(?:,|!|\n|$)", tail)))
+        return bool(re.match(
+            r"\s+o (?:odstapieniu od umowy|rozwiazaniu umowy|wypowiedzeniu umowy)\b",
+            tail, re.I))
+    if category == "pl_emphasis":
+        # shortcut: explicit local definitions only; other mechanisms need agent review.
+        return bool(re.match(
+            r"(?:\s+(?:administratora|walidatora|serwera))?\s+polega na\b|"
+            r"\s*:\s*(?:sprawdza|weryfikuje|odrzuca|blokuje|przekazuje)\b",
+            tail, re.I))
+    return False
+
+
 def scan_polish(text: str, include_quoted: bool = False) -> list[Violation]:
-    scan_text = mask_ignored_spans(text, include_quoted)
+    scan_text = polish_matching_view(mask_ignored_spans(text, include_quoted))
     starts = _line_starts(text)
     cache: dict[int, str] = {}
     found = []
-    for phrase, category in POLISH_PHRASES.items():
-        for match in re.finditer(r"(?<!\w)" + re.escape(phrase) + r"(?!\w)", scan_text, re.I):
+    for pattern, category in POLISH_PHRASES.items():
+        for match in re.finditer(r"(?<!\w)" + polish_matching_view(pattern) + r"(?!\w)", scan_text, re.I):
+            if _suppress_polish_match(scan_text, match, category):
+                continue
             line, column, context = _line_col_context(text, starts, match.start(), cache)
-            found.append({"phrase": match.group(), "category": category, "severity": "soft",
+            found.append({"phrase": text[match.start():match.end()], "category": category, "severity": "soft",
                           "line_number": line, "column": column, "context": context,
                           "suggestion": "Kandydat: sprawdź sens, rejestr i przypisanie; zachowaj użycie dosłowne."})
     return sorted(found, key=lambda v: (v["line_number"], v["column"]))

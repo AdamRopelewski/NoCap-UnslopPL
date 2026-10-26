@@ -106,7 +106,15 @@ def paragraphs(
     ]
 
 
-POLISH_WORDS = frozenset("""
+_POLISH_ASCII = str.maketrans("ąćęłńóśźżĄĆĘŁŃÓŚŹŻ", "acelnoszzACELNOSZZ")
+
+
+def polish_matching_view(text: str) -> str:
+    """Map only Polish letters, one character to one; keep source offsets."""
+    return text.translate(_POLISH_ASCII)
+
+
+POLISH_WORDS = frozenset(polish_matching_view("""
 nie jest są się oraz dla przez przy jeśli jeżeli chyba może można musi należy
 warto podkreślić zaznaczyć zauważyć niniejszym szanowni państwo dziękuję
 pytanie odpowiedź świecie dzisiejszym dynamicznym zmieniającym kluczową rolę
@@ -118,7 +126,12 @@ zostanie proszę płaci przekazuje według zdaniem powiedział twierdzi
 że żeby ponieważ gdy który która które którego których więc również
 już jeszcze będzie był była było były został została zwraca zwracają
 obsługuje żądanie żądania odpowiedzi serwer klienta usługi umowy kwota
-""".split())
+odgrywa odgrywają odgrywał odgrywała odgrywały odgrywali kluczowa rola
+kluczowej roli kompleksowego podejścia kompleksowym podejściem
+zaadresowania kwestię kwestii problemu problemów problemami
+wystąpić występuje otrzyma podpisze zapłacić żaden żadna żadne
+wedle powinien powinna muszą mogą warunkiem wyjątkiem koszt
+""").split())
 _FOREIGN_WORDS = frozenset("""
 bonjour merci ceci cette avec dans pour une est les des vous nous pas
 hola gracias esto una los las para pero con que por el
@@ -135,12 +148,12 @@ def detect_language(text: str, language: str | None = None) -> str:
         return language
     prose = re.sub(r"```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`", " ", text)
     tokens = re.findall(r"[^\W\d_]+", prose.lower())
-    pl = sum(t in POLISH_WORDS for t in tokens)
+    # ASCII role/SA also occur in English; accented rolę/są retain their evidence.
+    pl = sum(t not in {"role", "sa"} and polish_matching_view(t) in POLISH_WORDS for t in tokens)
     en = sum(t in ENGLISH_FUNCTION_WORDS for t in tokens)
     foreign = sum(t in _FOREIGN_WORDS for t in tokens)
     # shortcut: lexical routing leaves ambiguous fragments, use --language for them.
-    if (pl and pl > foreign and pl >= en) or (not en and not foreign and
-                                              any(t in {"pln", "zł"} for t in tokens)):
+    if pl and pl > foreign and pl >= en:
         return "pl"
     if foreign > en or (not en and re.search(r"[\u0400-\u052f\u3400-\u9fff]", prose)):
         return "unknown"

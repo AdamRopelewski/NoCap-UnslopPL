@@ -22,15 +22,57 @@ Examples for context review:
 - `„Warto podkreślić” to cytat.` stays intact.
 - `Szanowni Państwo, proszę o podpis.` stays intact in a letter.
 - `Może wystąpić błąd API.` stays intact. Modality describes uncertainty.
+- `Algorytm układa terminy.` stays intact when the source shows no defect.
+- `Przy rozsądnym nakładzie czasu` retains its time criterion. `Bez
+  niepotrzebnych powtórek` changes that criterion.
+- `Zapamiętaj:` can serve as a recap in teaching material. Changing the label
+  to `Rola FSRS:` alone repairs no defect.
 
 CLI: `python -B scripts/suggest.py tekst.md --language pl` emits candidate spans.
 `python -B scripts/banned_phrase_scan.py tekst.md --language pl` audits phrases.
 Offsets are Python character indices in the original text, rather than byte or
 UTF-16 offsets. Neither command rewrites prose.
 
-Lexical routing is a heuristic. Short fragments and mixed-language quotations
-can require an override. The catalog omits inflectional and paraphrase coverage;
-read the whole source. Polish voice training and stylometry await validation.
+Lexical routing is a heuristic. Polish lexical cues can route short prose with
+English API names. Shared words, English acronyms and currency alone supply no
+Polish evidence. Ambiguous fragments and mixed-language quotations can require
+an override. Polish voice training and stylometry await validation.
+Numeric `PLN` and `zł` amounts retain exact surface protection on the English
+route, including short fragments such as `3,5 PLN` and `-3,5 zl`.
+
+## v0.2 matching and context limits
+
+The catalog uses bounded phrase regexes. Supported inflections include
+`odgrywa/odgrywają/odgrywał/odgrywała/odgrywały/odgrywali kluczową rolę`,
+`kompleksowe podejście / kompleksowego podejścia / kompleksowym podejściem`,
+the same adjective/noun cases for `przełomowe rozwiązanie`,
+`zaadresować problem/problemy/kwestię/kwestie` and
+`zaadresowania problemu/problemów/kwestii`. Standalone `kluczowa rola` is also
+a candidate. Other inflections and paraphrases require whole-source review.
+
+A matching view maps only Polish letters to ASCII, one character to one.
+Case-insensitive matching accepts `Warto zauwazyc` and `ODGRYWAL KLUCZOWA ROLE`.
+It returns original surfaces and offsets, including beside English names.
+Quotes and code retain masking. Scripts neither restore accents nor normalize
+Unicode; decomposed combining accents remain outside this matching rule.
+
+Local protections cover a line-opening `Szanowni Państwo` followed by a comma,
+exclamation mark or line end; `niniejszym informujemy o` followed by
+`odstąpieniu od umowy`, `rozwiązaniu umowy` or `wypowiedzeniu umowy`;
+and literal `należy zaznaczyć pole wyboru/checkbox`. Role candidates are protected
+when immediately followed by `polega na` (optionally after
+`administratora/walidatora/serwera`) or a colon introducing
+`sprawdza/weryfikuje/odrzuca/blokuje/przekazuje`. ASCII spellings share these rules.
+`Dedykowany serwer` supplies no candidate by itself.
+
+These cues protect only their span. A letter, API term or `umowa` leaves other
+matches active. For example, `Szanowni Państwo, warto zauważyć, że API działa.`
+retains the framing candidate. `API odgrywa kluczową rolę w sukcesie firmy.`
+stays a candidate; a mechanism expressed outside the listed definition forms
+also stays for agent judgment. Legal obligations, modality, passive voice,
+nominalizations and dashes alone supply no defect. Quoted boilerplate stays
+masked unless quoted scanning is requested. This is candidate detection,
+rather than morphology or semantic understanding; Polish quality is unmeasured.
 
 ## Preservation and completed review
 
@@ -39,6 +81,10 @@ short or ambiguous sources. Validation also supplements cached constraints with
 Polish constraints, including exact numeric surfaces and adjacent quantity
 qualifiers and units. Quantity coverage uses a unit list; review the remaining
 wording against the source.
+ASCII cues use the same checks for negation, modality, conditions, scope and
+attribution. Dates such as `12 pazdziernika 2026` and amounts such as `3,5 zl`
+retain their original surfaces. These checks warn about cue changes and block
+lost extracted quantities/dates; they still require claim-by-claim review.
 
 ```sh
 python -B scripts/extract_constraints.py original.txt --language pl

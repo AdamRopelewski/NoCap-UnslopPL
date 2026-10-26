@@ -113,7 +113,7 @@ def mtld(tokens, threshold=0.72):
 
 def feature_bundle(text):
     if detect_language(text) == "pl":
-        raise ValueError("Polish voice training/scoring is outside NoCap v0.1")
+        raise ValueError("Polish voice training/scoring is outside NoCap v0.2")
     toks = words(text)
     total = max(1, len(toks))
     punct_counts = collections.Counter(ch for ch in text if ch in PUNCT)
@@ -158,7 +158,7 @@ def build_profile(samples_dir, background=None):
     paths = list(iter_docs(samples_dir))
     docs = [p.read_text(encoding="utf-8", errors="replace") for p in paths]
     if any(detect_language(doc) == "pl" for doc in docs):
-        raise ValueError("Polish voice training/scoring is outside NoCap v0.1")
+        raise ValueError("Polish voice training/scoring is outside NoCap v0.2")
     text = "\n\n".join(docs)
     profile = feature_bundle(text)
     profile["function_word_background"] = background_stats(background)

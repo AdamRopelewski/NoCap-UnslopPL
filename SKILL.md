@@ -4,7 +4,7 @@ description: Audit or rewrite Polish and English prose. Use for "usuń ślady AI
 license: MIT
 metadata:
   author: claytonkim
-  version: "0.1.0"
+  version: "0.2.0"
 ---
 
 # NoCap
@@ -22,7 +22,7 @@ English API names, to Polish. Use `--language pl` or `--language en` for ambiguo
 fragments. Unsupported languages receive a limitation report and the source.
 For Polish only, read [references/polish.md](references/polish.md).
 English retains the command flows and presets below.
-Polish `teach`, `mimic`, calibration and voice checks are outside v0.1:
+Polish `teach`, `mimic`, calibration and voice checks are outside v0.2:
 report that limit and offer `cleanup` or `rewrite` without voice scores.
 Natural requests such as "usuń ślady AI" route to `rewrite`; "wskaż problemy,
 bez zmian" routes to `cleanup --report`.

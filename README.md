@@ -1,7 +1,11 @@
-# NoCap 0.1
+# NoCap 0.2
 
 NoCap extends Unslop with Polish phrase audit and agent-reviewed rewrite.
 English commands, phrase rules, presets and voice tools remain available.
+Version 0.2 adds bounded phrase inflections, ASCII Polish matching and local
+protections for correspondence, instructions, role definitions and legal notices.
+Polish prose can contain English API terms. Matches retain the source spelling
+and character offsets. These changes carry no measured Polish quality claim.
 
 ## Install and use
 
@@ -35,7 +39,7 @@ rather than proving meaning. A changed Polish draft requires agent review. Follo
 `check_suggestions.py suggestions.json --language pl --reviewed`. Protected
 candidates may remain; hard preservation failures still block acceptance.
 Polish Flesch, structure/silhouette gates, rubric scores and voice training or
-scoring are unavailable in v0.1. English keeps its existing tooling.
+scoring are unavailable in v0.2. English keeps its existing tooling.
 
 ## Provenance and licensing
 

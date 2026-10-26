@@ -4,8 +4,8 @@ from pathlib import Path
 import subprocess
 import sys
 
-from _lang import detect_language
-from banned_phrase_scan import POLISH_PHRASES, mask_ignored_spans, scan_for_violations
+from _lang import detect_language, polish_matching_view
+from banned_phrase_scan import mask_ignored_spans, scan_for_violations
 from extract_constraints import extract_constraints
 from check_suggestions import check as check_suggestions
 from readability_metrics import calculate_metrics
@@ -35,8 +35,23 @@ for text, language in [
     check(detect_language(text) == language)
 for headline in ["language model", "Data model", "Model selection", "Amounts in PLN", "The invoice is 500 PLN."]:
     check(detect_language(headline) == "en")
-for phrase in POLISH_PHRASES:
-    check(bool(scan_for_violations(phrase)))
+for phrase in [
+    "warto zauważyć", "warto podkreślić", "należy zaznaczyć",
+    "w dzisiejszym dynamicznym świecie", "odgrywa kluczową rolę",
+    "odgrywają kluczową rolę", "odgrywał kluczową rolę", "odgrywała kluczową rolę",
+    "odgrywały kluczową rolę", "odgrywali kluczową rolę", "kluczowa rola",
+    "wykorzystać synergię", "uwolnić potencjał", "zaadresować problem",
+    "zaadresować problemy", "zaadresować kwestię", "zaadresować kwestie",
+    "zaadresowania problemu", "zaadresowania problemów", "zaadresowania kwestii",
+    "jako model językowy", "mam nadzieję, że ta odpowiedź", "oto poprawiona wersja",
+    "przełomowe rozwiązanie", "przełomowego rozwiązania", "przełomowym rozwiązaniem",
+    "kompleksowe podejście", "kompleksowego podejścia", "kompleksowym podejściem",
+    "niniejszym informujemy", "szanowni państwo",
+]:
+    for surface in [phrase, polish_matching_view(phrase).upper()]:
+        hits = scan_for_violations("Hasło: " + surface, language="pl")
+        check(len(hits) == 1 and hits[0]["phrase"] == surface and hits[0]["severity"] == "soft")
+        check(scan_for_violations(f'„{surface}” `{surface}`', language="pl") == [])
 check(detect_language("API", "pl") == "pl")
 check(detect_language("Nie działa.", "en") == "en")
 check(bool(scan_for_violations("Warto zauważyć, że API działa.")))
@@ -122,6 +137,90 @@ edits = [{"span": {"start": 0, "end": len(span_text), "text": span_text},
           "suggested_replacement": ""}]
 check(check_suggestions(cleanup, edits, reviewed=True) == [])
 check(any(f["gate"] == "agent-review" for f in check_suggestions(cleanup, edits)))
+
+# v0.2: ASCII/mixed prose follows the same source-offset and review contracts.
+for text in ["Warto zauwazyc, ze API dziala", "Moze wystapic blad request timeout",
+             "Nie dziala.", "Serwer.", "Kompleksowego podejscia do SDK",
+             "Zaadresowania kwestii API", "Otrzyma 5 PLN."]:
+    check(detect_language(text) == "pl")
+for text in ["API", "SDK JSON HTTP", "PLN", "500 PLN", "Data model", "Model selection",
+             "language model", "Amounts in PLN", "Role model", "Role selection", "SA",
+             "The dedicated server checks the API request."]:
+    check(detect_language(text) == "en")
+for original in ["3,5 PLN", "500 PLN", "-3,5 zl"]:
+    check(detect_language(original) == "en")
+    check(any(c["type"] == "pl_currency" and c["value"] == original
+              for c in extract_constraints(original)))
+    changed = original.replace("5", "6")
+    check(not validate_preservation(original, changed)["passed"])
+    check(not validate_preservation(original, changed, [])["passed"])
+for original in ["Kwota wynosi +3,5 PLN.", "+3,5 zl", "+3,5 zł", "3,5 pln", "3,5 ZŁ", "3,5zł"]:
+    amount = original.removeprefix("Kwota wynosi ").removesuffix(".")
+    check(any(c["type"] == "pl_currency" and c["value"] == amount and
+              original[c["start"]:c["end"]] == amount for c in extract_constraints(original)))
+    check(validate_preservation(original, original)["passed"])
+    changed = original.replace("3,5", "3,6")
+    check(not validate_preservation(original, changed)["passed"])
+    check(not validate_preservation(original, changed, [])["passed"])
+check(not validate_preservation("+3,5 PLN", "3,5 PLN")["passed"])
+check(detect_language("bonjour merci") == "unknown")
+check(validate_preservation("bonjour merci", "bonjour salut")["passed"])
+check(scan_for_violations("Warto zauwazyc, ze API dziala", language="en") == [])
+for text in ["Łódź İ SDK.\nŻółw: ODGRYWAJĄ KLUCZOWĄ ROLĘ w API.",
+             "Łódź İ SDK.\nŻółw: ODGRYWAL KLUCZOWA ROLE w API."]:
+    check(len(polish_matching_view(text)) == len(text))
+    suggestion = build_suggestions(text)[0]
+    span = suggestion["span"]
+    check(span["start"] == text.index("ODGR"))
+    check(span["text"] == text[span["start"]:span["end"]] == text.split(": ")[1].split(" w API")[0])
+for protected in ['„Warto zauwazyc”', '`Warto zauwazyc`',
+                  '~~~pl\nWarto zauwazyc\n~~~', '> Warto zauwazyc']:
+    check(scan_for_violations(protected, language="pl") == [])
+for text in [
+    "Szanowni Państwo, warto zauważyć, że API działa.",
+    "Niniejszym informujemy o odstąpieniu od umowy. Warto zauważyć, że zwracamy kwotę.",
+    "Walidator odgrywa kluczową rolę: weryfikuje podpis JWT. Warto zauważyć, że API działa.",
+    "Kluczowa rola administratora polega na nadawaniu uprawnień. Warto zauważyć, że API działa.",
+    "Dedykowany serwer obsługuje API. Warto zauważyć, że API działa.",
+    "Należy zaznaczyć pole wyboru przed wysłaniem request. Warto zauważyć, że API działa.",
+    "Umowa: klient musi zapłacić. „Niniejszym informujemy” to cytat. Warto zauważyć, że API działa.",
+]:
+    for surface in [text, polish_matching_view(text)]:
+        hits = scan_for_violations(surface)
+        check(len(hits) == 1 and polish_matching_view(hits[0]["phrase"]).lower() == "warto zauwazyc")
+check(bool(scan_for_violations("Niniejszym informujemy o kompleksowym podejściu do umowy.")))
+check(bool(scan_for_violations("API odgrywa kluczową rolę w sukcesie firmy.")))
+check(scan_for_violations("Zaadresować problematyczny kod.", language="pl") == [])
+
+source = "Wedlug Anny zaden klient nie moze zaplacic tylko 1 234,56 zl 12 pazdziernika 2026, jesli Piotr podpisze umowe."
+check(detect_language(source) == "pl")
+check(validate_preservation(source, source)["warnings"] == [])
+for old, new, marker in [("zaden ", "", "negation"), ("moze", "musi", "modality"),
+                         ("jesli", "poniewaz", "condition"), ("tylko ", "", "scope"),
+                         ("Wedlug ", "", "attribution")]:
+    check(any(marker in w for w in validate_preservation(source, source.replace(old, new))["warnings"]))
+for cue in ["jezeli", "chyba ze", "pod warunkiem", "o ile", "z wyjatkiem"]:
+    original = "API dziala " + cue + " klient wysle request."
+    check(any("condition" in w for w in validate_preservation(original, original.replace(cue, "bo"))["warnings"]))
+for original in [source, "Kwota wynosi powyzej -3,5 zl.", "Termin: 12 wrzesnia 2026."]:
+    check(validate_preservation(original, original, [], language="pl")["passed"])
+    for constraint in extract_constraints(original, "pl"):
+        check(original[constraint["start"]:constraint["end"]] == constraint["value"])
+for original, old, new in [(source, "1 234,56 zl", "1 234,57 zl"),
+                            (source, "pazdziernika", "wrzesnia"),
+                            ("Kwota wynosi powyzej -3,5 zl.", "powyzej ", ""),
+                            ("Kwota wynosi -3,5 zl.", "-", "")]:
+    changed = original.replace(old, new)
+    check(not validate_preservation(original, changed, [], language="pl")["passed"])
+    start = original.index(old)
+    edits = [{"span": {"start": start, "end": start + len(old), "text": old},
+              "suggested_replacement": new}]
+    check(any(f["gate"] == "accept-all" for f in check_suggestions(original, edits, reviewed=True)))
+cleanup = "Warto zauwazyc, ze API dziala."
+span_text = "Warto zauwazyc, ze "
+edits = [{"span": {"start": 0, "end": len(span_text), "text": span_text}, "suggested_replacement": ""}]
+check(any(f["gate"] == "agent-review" for f in check_suggestions(cleanup, edits)))
+check(check_suggestions(cleanup, edits, reviewed=True) == [])
 for original, old, new in [(short, "3,5", "3,6"), (currency, "3,5", "3,6"),
                             ("Limit wynosi 5 kg i 10 m.", "5 kg i 10 m", "5 m i 10 kg")]:
     start = original.index(old)

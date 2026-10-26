@@ -39,3 +39,4 @@ runs/
 # Local provenance and implementation tooling
 /upstream/
 /.serena/
+/compare/
