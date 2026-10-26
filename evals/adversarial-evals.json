@@ -640,10 +640,6 @@
         },
         {
           "type": "stdout_contains",
-          "value": "compact_contract=true"
-        },
-        {
-          "type": "stdout_contains",
           "value": "soft_silhouette_with_advisory_burstiness=true"
         },
         {

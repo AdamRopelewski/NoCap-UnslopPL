@@ -28,11 +28,12 @@ from typing import TypedDict
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from _lang import detect_language, polish_matching_view
 from _lang import (  # noqa: E402
     ENGLISH_FUNCTION_WORDS,
+    detect_language,
     english_function_share,
     is_probably_english,
+    polish_matching_view,
 )
 
 
@@ -742,8 +743,14 @@ POLISH_PHRASES = {
     "warto podkreślić": "pl_empty_framing",
     "należy zaznaczyć": "pl_empty_framing",
     "w dzisiejszym dynamicznym świecie": "pl_empty_framing",
+    r"(?:dokonać|dokonał|dokonała|dokonali|dokonano|dokonuje|dokonują|dokonujemy) (?:oceny|analizy|wyboru|przeglądu)": "pl_nominalization",
+    r"(?:przeprowadzić|przeprowadził|przeprowadzono|przeprowadza|przeprowadzają) (?:analizę|ocenę|weryfikację)": "pl_nominalization",
+    r"(?:wykonać|wykonał|wykonano|wykonuje|wykonują) (?:analizę|ocenę|sprawdzenie)": "pl_nominalization",
+    r"(?:w celu|celem) (?:dokonania|wykonania|przeprowadzenia)": "pl_purpose",
+    r"(?:na dzień dzisiejszy|w dniu dzisiejszym)": "pl_time",
     r"odgrywa(?:ją|ł|ła|ły|li)? kluczową rolę": "pl_emphasis",
     r"kluczowa rola": "pl_emphasis",
+    r"(?:trzeba podkreślić|podkreślić należy|podkreślenia wymaga)": "pl_emphasis",
     "wykorzystać synergię": "pl_jargon",
     "uwolnić potencjał": "pl_jargon",
     r"zaadresować (?:problem(?:y)?|kwestię|kwestie)": "pl_calque",
@@ -773,6 +780,8 @@ def _suppress_polish_match(text: str, match: re.Match, category: str) -> bool:
             r"\s+o (?:odstapieniu od umowy|rozwiazaniu umowy|wypowiedzeniu umowy)\b",
             tail, re.I))
     if category == "pl_emphasis":
+        if re.fullmatch(r"(?:trzeba podkreslic|podkreslic nalezy|podkreslenia wymaga)", phrase, re.I):
+            return bool(re.match(r"\s+(?:tekst|wyraz|fragment)\b", tail, re.I))
         # shortcut: explicit local definitions only; other mechanisms need agent review.
         return bool(re.match(
             r"(?:\s+(?:administratora|walidatora|serwera))?\s+polega na\b|"

@@ -37,7 +37,11 @@ for headline in ["language model", "Data model", "Model selection", "Amounts in 
     check(detect_language(headline) == "en")
 for phrase in [
     "warto zauważyć", "warto podkreślić", "należy zaznaczyć",
-    "w dzisiejszym dynamicznym świecie", "odgrywa kluczową rolę",
+    "w dzisiejszym dynamicznym świecie", "dokonać oceny", "dokonał analizy",
+    "dokonano wyboru", "przeprowadzić weryfikację", "wykonać sprawdzenie",
+    "w celu dokonania", "celem przeprowadzenia", "na dzień dzisiejszy",
+    "w dniu dzisiejszym", "trzeba podkreślić", "podkreślić należy",
+    "podkreślenia wymaga", "odgrywa kluczową rolę",
     "odgrywają kluczową rolę", "odgrywał kluczową rolę", "odgrywała kluczową rolę",
     "odgrywały kluczową rolę", "odgrywali kluczową rolę", "kluczowa rola",
     "wykorzystać synergię", "uwolnić potencjał", "zaadresować problem",
@@ -191,6 +195,41 @@ for text in [
 check(bool(scan_for_violations("Niniejszym informujemy o kompleksowym podejściu do umowy.")))
 check(bool(scan_for_violations("API odgrywa kluczową rolę w sukcesie firmy.")))
 check(scan_for_violations("Zaadresować problematyczny kod.", language="pl") == [])
+
+# v0.3 auto routing reaches each new family and retains English headings.
+for source, category in [
+    ("Zespol dokonal oceny ofert.", "pl_nominalization"),
+    ("W celu dokonania wyboru porownaj oferty.", "pl_purpose"),
+    ("Na dzien dzisiejszy brak odpowiedzi.", "pl_time"),
+    ("Podkreślenia wymaga wynik badania.", "pl_emphasis"),
+]:
+    check(any(hit["category"] == category for hit in scan_for_violations(source)))
+check(detect_language("Model selection and data analysis") == "en")
+
+# v0.3: candidate phrases stay bounded; context and source meaning decide edits.
+for source, phrase, category in [
+    ("Zespół dokonał oceny ofert.", "dokonał oceny", "pl_nominalization"),
+    ("W celu dokonania wyboru porównaj oferty.", "W celu dokonania", "pl_purpose"),
+    ("Na dzień dzisiejszy brak odpowiedzi.", "Na dzień dzisiejszy", "pl_time"),
+    ("Trzeba podkreślić, że serwer działa.", "Trzeba podkreślić", "pl_emphasis"),
+]:
+    hits = scan_for_violations(source, language="pl")
+    check(any(hit["phrase"] == phrase and hit["category"] == category for hit in hits))
+for source, category in [
+    ("Biegły ma dokonać oceny oddziaływania na środowisko.", "pl_nominalization"),
+    ("Dane przetwarzamy w celu dokonania oceny ryzyka z art. 6.", "pl_purpose"),
+]:
+    hits = scan_for_violations(source, language="pl")
+    check(len(hits) == 1 and hits[0]["category"] == category and hits[0]["severity"] == "soft")
+for source in [
+    "„Na dzień dzisiejszy” to cytat z formularza.",
+    "Podkreślić należy tekst i zapisać plik.",
+]:
+    check(scan_for_violations(source, language="pl") == [])
+source = "Łódź.\nŻółw: W CELU DOKONANIA wyboru."
+hits = scan_for_violations(source, language="pl")
+check(len(hits) == 1 and hits[0]["phrase"] == "W CELU DOKONANIA" and hits[0]["column"] == 7)
+check(source.index(hits[0]["phrase"]) == source.index("W CELU"))
 
 source = "Wedlug Anny zaden klient nie moze zaplacic tylko 1 234,56 zl 12 pazdziernika 2026, jesli Piotr podpisze umowe."
 check(detect_language(source) == "pl")

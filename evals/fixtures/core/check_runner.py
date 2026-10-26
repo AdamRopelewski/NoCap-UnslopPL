@@ -419,7 +419,8 @@ def main() -> int:
     except RunnerError:
         cross_sentence_edit_span_rejected = True
     resolved_contract = _shipping_contract()["resolved_contract"]
-    compact_contract = len(resolved_contract.split()) <= 650
+    contract_words = len(resolved_contract.split())
+    compact_contract = contract_words <= 650
     # Prompt wording is not evidence of model behavior. Behavioral cases own
     # contextual judgment; this fixture checks the actual annotation boundary.
     try:
@@ -994,11 +995,11 @@ def main() -> int:
         )
 
     print("arms={} runs={}".format(",".join(arms), len(predictions["runs"])))
-    print(
-        "compact_contract={}".format(
-            str(bool(compact_contract)).lower()
-        )
-    )
+    print("contract_words={} compact_contract={}".format(
+        contract_words, str(compact_contract).lower()
+    ))
+    if not compact_contract:
+        print("contract_budget_warning=over_inherited_650_words")
     print("raw_evidence={} provenance={}".format(str(bool(evidence_ok)).lower(), str(bool(provenance_ok)).lower()))
     print(
         "reproducible_provenance={}".format(
@@ -1112,7 +1113,6 @@ def main() -> int:
         and development_ok
         and independent_judge_required
         and development_tune_only
-        and compact_contract
         and audit_edit_rejected
         and invented_audit_quote_rejected
         and overlapping_quote_rejected

@@ -12,6 +12,9 @@ All candidates use soft severity; replacement fields start as null.
 | Chatbot residue | Jako model językowy; oto poprawiona wersja. | A description of a model or a quoted response is valid. |
 | Praise | Przełomowe rozwiązanie; kompleksowe podejście. | Check the stated change, mechanism or evidence. |
 | Formality | Niniejszym informujemy; Szanowni Państwo. | A notice, letter or legal register can require these forms. |
+| Nominalized act | Dokonał oceny; przeprowadzić weryfikację. | Is this a named procedure, or does a shorter verb keep the actor and act? |
+| Purpose frame | W celu dokonania; celem przeprowadzenia. | Check the actor and any legally material purpose. |
+| Date frame | Na dzień dzisiejszy; w dniu dzisiejszym. | Check quotations and document labels. |
 
 Examples for context review:
 
@@ -27,6 +30,9 @@ Examples for context review:
   niepotrzebnych powtórek` changes that criterion.
 - `Zapamiętaj:` can serve as a recap in teaching material. Changing the label
   to `Rola FSRS:` alone repairs no defect.
+- `Technologia przesuwa granicę wykonalności, a człowiek zaczyna traktować nową granicę jak minimum.` stays intact without a demonstrated defect. `Większa liczba zadań` narrows its meaning and loses the actor.
+- `Nie każda minuta spędzona w mediach społecznościowych jest stracona...` can introduce a substantive qualification. Its contrast alone supplies no finding.
+- `czy ten czas wolno przeznaczyć na mniej pracy` keeps permission and scope. Replacing it with `można ... mniej obowiązków` changes both.
 
 CLI: `python -B scripts/suggest.py tekst.md --language pl` emits candidate spans.
 `python -B scripts/banned_phrase_scan.py tekst.md --language pl` audits phrases.
@@ -40,7 +46,7 @@ an override. Polish voice training and stylometry await validation.
 Numeric `PLN` and `zł` amounts retain exact surface protection on the English
 route, including short fragments such as `3,5 PLN` and `-3,5 zl`.
 
-## v0.2 matching and context limits
+## v0.3 matching and context limits
 
 The catalog uses bounded phrase regexes. Supported inflections include
 `odgrywa/odgrywają/odgrywał/odgrywała/odgrywały/odgrywali kluczową rolę`,
@@ -49,6 +55,8 @@ the same adjective/noun cases for `przełomowe rozwiązanie`,
 `zaadresować problem/problemy/kwestię/kwestie` and
 `zaadresowania problemu/problemów/kwestii`. Standalone `kluczowa rola` is also
 a candidate. Other inflections and paraphrases require whole-source review.
+
+v0.3 adds closed forms of `dokonać/dokonał/dokonano` with `oceny/analizy/wyboru/przeglądu`, selected `przeprowadzić/wykonać` collocations, `w celu/celem dokonania/wykonania/przeprowadzenia`, two date frames, and `trzeba podkreślić/podkreślić należy/podkreślenia wymaga`. These are soft candidates. The [UW plain-language standard](https://www.uw.edu.pl/wp-content/uploads/2024/10/prosty-jezyk-%E2%80%93-standard.pdf) gives `dokonać oceny → ocenić` and `w celu złożenia → aby złożyć` as audience-sensitive examples. Neither example licenses a mechanical replacement. Preserve named acts, material purposes, attribution, modality and source voice. A legal or scientific context alone leaves the candidate for review; quotations and code stay masked. Literal `podkreślić należy tekst/wyraz/fragment` is suppressed.
 
 A matching view maps only Polish letters to ASCII, one character to one.
 Case-insensitive matching accepts `Warto zauwazyc` and `ODGRYWAL KLUCZOWA ROLE`.

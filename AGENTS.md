@@ -8,12 +8,11 @@ before changing shared helpers.
 Keep `upstream/unslop` and `research/` untouched. Preserve user edits and the Git index. Leave commits and staging to the
 user. Preserve attribution and license declarations; add no inferred license.
 
-For v0.2, use one assert-based smoke check and fixed English CLI comparisons
-against upstream when the comparison checkout exists; report skipped comparisons
-when absent. Compile/import touched scripts without bytecode artifacts.
-Run touched CLI help and `git diff --check`. Verify upstream SHA/status and the
-staged research PDF. Skip model calls, benchmarks, eval expansion and broad
-suites unless the user authorizes them. Upstream eval procedures remain in
+For v0.3, use focused assertions for added rules. Compile/import touched scripts
+without bytecode artifacts. Run touched CLI help and `git diff --check`. Verify
+upstream SHA/status, the Git index and research status. Leave document comparisons to
+the user. Skip model calls, benchmarks, eval expansion and broad suites unless
+the user authorizes them. Upstream eval procedures remain in
 `references/maintenance.md` for work with that scope. Keep benchmark assertions
 and fixtures intact.
 

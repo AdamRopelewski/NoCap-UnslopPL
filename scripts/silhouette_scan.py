@@ -63,7 +63,6 @@ from structure_scan import STOPWORDS as _STRUCTURE_STOPWORDS  # noqa: E402
 from _lang import (  # noqa: E402
     detect_language,
     unavailable,
-    is_probably_english,
     paragraphs as _prose_paragraphs,
     words,
 )

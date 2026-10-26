@@ -131,6 +131,11 @@ kluczowej roli kompleksowego podejścia kompleksowym podejściem
 zaadresowania kwestię kwestii problemu problemów problemami
 wystąpić występuje otrzyma podpisze zapłacić żaden żadna żadne
 wedle powinien powinna muszą mogą warunkiem wyjątkiem koszt
+dokonać dokonał dokonała dokonali dokonano dokonuje dokonują dokonujemy
+oceny analizy wyboru przeglądu przeprowadzić przeprowadził przeprowadzono
+przeprowadza przeprowadzają analizę ocenę weryfikację wykonać wykonał
+wykonano wykonuje wykonują sprawdzenie celu celem dokonania wykonania
+przeprowadzenia dzień dzisiejszy trzeba podkreślenia wymaga
 """).split())
 _FOREIGN_WORDS = frozenset("""
 bonjour merci ceci cette avec dans pour une est les des vous nous pas

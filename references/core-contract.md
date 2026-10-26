@@ -1,107 +1,101 @@
 # NoCap core rewrite contract
 
-## Goal
-
-Repair concrete AI-writing or clarity defects. Leave everything else unchanged;
-prefer a no-op to an uncertain edit.
-
 ## Findings
 
-Quote the smallest defective span and explain the contextual defect: formulaic
-framing, empty or inflated abstraction, unsupported rhetorical certainty,
-opaque or mixed metaphor, misleading heading, needless repetition, or clear
-internal contradiction or ambiguity. Track every hard scanner match and other
-defect as confirmed or protected, with a reason; repair every confirmed span.
-Read every sentence before scanner output, including headings and endings.
-Phrase lists are incomplete; recognize paraphrased scaffolding by function. Confirm filler when deletion loses no meaning;
-replace inflated diction with its plain equivalent. Punctuation, vocabulary,
-cadence, and structure alone prove neither a defect nor authorship.
+Read the whole source, including headings and endings, before scanner output.
+Quote the smallest defective span. State its contextual defect and the benefit
+of the smallest repair. Track each scanner hit and other defect as confirmed or
+protected, with a reason. Repair every confirmed defect. If none are confirmed,
+return the source byte-for-byte.
 
-Do not fact-check or infer truth from the date or outside knowledge. Missing
-proof alone does not make a plan, offer, future date, promotion, technical term,
-literal phrase, or attribution defective.
+Look for formulaic framing, empty or inflated abstraction, unsupported
+rhetorical certainty, opaque or mixed metaphor, misleading headings, needless
+repetition, contradiction and ambiguity. Phrase lists miss paraphrased
+scaffolding; judge its function. Delete filler only when meaning survives;
+replace inflated diction with plain words. A label, synonym preference,
+metaphor or contrast shape alone supplies no finding. Neither punctuation,
+vocabulary, cadence nor structure proves a defect or authorship. Preserve useful
+images, contrasts, cadence, summaries and clear sentences. Soft cadence and
+document-shape scores alone never authorize edits. Confirm a finding only when
+the defect is clearer than the case for preservation; preserve uncertain spans.
 
-Compare the source's claims. Qualify a status contradicted by observations.
-Explicitly reject every initial, conditional, or repeat action that exceeds a
-stated limit; a hedge does not make it safe. Preserve evidence and quantities.
-Keep attributed claims intact and state conflicts separately. Make no edit when
-nearby prose already states the conflict and uncertainty. Attribution does not
-protect a separate operative recommendation.
+Judge claims from the source alone. Do not infer truth from outside knowledge
+or the date. Missing proof alone leaves plans, offers, future dates, promotions,
+technical terms, literal phrases and attributed claims intact. Compare the
+source's claims: qualify status contradicted by observations and reject every
+initial, conditional or repeated action beyond a stated limit. A hedge cannot
+repair an excess. Keep attribution intact and state conflicts separately;
+leave a claim alone when nearby prose already states the conflict and
+uncertainty. Attribution does not shield a separate operative recommendation.
 
-A scanner match alone never authorizes an edit. Protect literal, domain-valid,
-quoted, attributed, accurately caveated, or genre-natural uses. In ordinary
-business prose, confirm stock praise, filler, or vague evaluation only when
-context supplies no mechanism, definition, action, or measure. A noun referent
-alone is insufficient: "game-changer for the product" stays vague unless the
-text says what changes. "Actionable" is valid with defined actions; "raises the
-bar" is valid when literal or measured. Soft cadence and document-shape scores
-never authorize edits alone.
+Treat scanner matches as candidates. Protect literal, domain-valid, quoted,
+attributed, accurately caveated and genre-natural uses. In business prose,
+confirm praise, filler or vague evaluation only when context lacks a mechanism,
+definition, action or measure. A noun referent alone gives none: “game-changer
+for the product” stays vague without what changes. “Actionable” can name defined
+actions; “raises the bar” can be literal or measured.
 
-For headings and slide titles, replace inanimate agency, tool personification,
-or vague transformation with the actor, test, mechanism, result, decision, or
-completion criterion. Renaming the same abstraction is not a repair. When macro
-cleanup is requested, remove connective scaffolding and a moralizing recap coda,
-including repeated facts; its lesson is not protected.
-
+For headings and slide titles, expose a hidden actor, test, mechanism, result,
+decision or completion criterion when inanimate agency, tool personification
+or vague transformation obscures it. A renamed abstraction repairs nothing.
 Inspect slogans and closing calls to action even when tools are quiet. Flag
-false equivalence, contradicted certainty, empty abstraction, or incompatible
-metaphors. Protect concrete promotions, genuine aphorisms, capped offers, future
-plans, and concrete calls to action unless the source contradicts them. A stock
-journey or milestone sentence adding no fact, action, or claim is empty.
+false equivalence, contradicted certainty, empty abstraction and incompatible
+metaphors. Protect concrete promotions, genuine aphorisms, capped offers,
+future plans and concrete calls to action unless the source contradicts them.
+A stock journey or milestone sentence with no fact, action or claim is empty.
+For requested macro cleanup, remove connective scaffolding and recaps only
+when they repeat facts without useful summary or add a moralizing lesson.
 
 ## Rewrite
 
-Edit only sentences with confirmed findings, using the smallest repair. Copy
-every other sentence byte-for-byte in its original order and paragraph. With no
-findings, return the source exactly.
+Edit sentences with confirmed findings only. Use the smallest repair. Copy
+every other sentence byte-for-byte in its original order and paragraph.
+Preserve facts, evidence, quantities, dates, names, quotations, citations,
+code, units, actors, objects, ownership, party roles, criteria, scope,
+conditions, negation, modality, uncertainty, attribution, register and meaning.
+Keep permission distinct from ability. Preserve force-bearing “never”, “must”
+and “all” exactly in safety, security, legal and technical rules. Add no claims,
+advice, personality, anecdote, certainty or conclusion. Delete empty framing
+without replacing it with filler or staccato prose. Presets change delivery,
+not facts. For lists, return one validated replacement per item.
 
-Preserve facts, quantities, dates, names, quotations, citations, code, units,
-scope, uncertainty, attribution, register, and meaning. Add no claims, advice,
-personality, anecdote, certainty, or conclusion. Delete empty framing; do not
-substitute filler or create staccato anti-slop prose. Re-read for missed defects
-and introduced filler; stop at matters of taste. Preserve force-bearing "never", "must", and
-"all" exactly in safety, security, legal, and technical rules. Presets change
-delivery, not facts. For lists, return one validated replacement per item.
-
+Re-read changed claims for missed defects and introduced filler. Stop at taste.
 For audit-only requests, report findings and protections without rewriting;
-report each requested load-bearing span separately. Exact no-op applies to
-rewrites, not audits that must report protections.
+report each requested load-bearing span separately. Exact no-op governs
+rewrites, while audits still report protections.
 
-## Decision rule
+## Polish branch
 
-Return a finding only when the contextual defect is clearer than preservation.
+Preserve the source language and register. Keep numeric surfaces exact: comma
+decimals, thousands separators, NBSP, PLN/zł, magnitude words, dates and
+references. Match each claim to its actor and object; numeric inventories miss
+switched owners and roles. Review every changed claim against the source,
+including conditions, obligations, scope and voice. Regex warnings are
+tripwires; a pass proves only that extracted constraints were found. Restore
+the original span on uncertainty. Never normalize numbers or typography as an
+automatic repair, invent factual corrections or narrow a clear image.
 
-## Polish validation branch
+Treat every `pl_*` hit as a candidate. Protect valid literal, quoted, technical,
+modal and register-dependent uses after context review. Check code and quotes
+against the source even when masked. ASCII Polish receives the same review:
+matching maps letters one-to-one without changing source offsets. Bounded
+inflections remain soft candidates. Greeting, instruction, role-definition and
+legal-notice protections cover only their matched phrase; inspect the rest.
+Judge nominalizations and purpose frames by actor, act and genre before using
+a shorter verb or clause. Infer register from source and medium.
 
-Preserve the source language, register and exact numeric surfaces, including
-comma decimals, thousands separators, NBSP, PLN/zł and magnitude words.
-Preserve dates, references, negation, modality, conditions, scope, party roles,
-ownership and attribution. Match each claim to its actor and object before
-accepting an edit. Numeric inventories alone miss switched owners and roles.
-Semantic regex warnings are tripwires. A pass proves only that extracted
-constraints were found. Review every changed claim against the source; on
-uncertainty return the original span. With zero confirmed defects, return the
-source byte-for-byte.
+Run preservation with `--language pl`, phrase audit and diff checks. Follow
+[Polish preservation and completed review](polish.md#preservation-and-completed-review):
+record confirmed defects and protections, resolve defects, review changed
+claims, then acknowledge the completed review with
+`check_suggestions.py --language pl --reviewed`. That acknowledgment clears
+the candidate and meaning-review gate, never hard preservation failures.
+English Flesch, structure, silhouette, rubric thresholds and voice scores are
+unavailable for Polish; skip their gates, structure-climb and voice tooling.
+Polish strict output reports warnings and review decisions, not an English
+grade or 32/40 pass.
 
-For Polish, run preservation with `--language pl`, phrase audit and diff checks.
-Use the completion flow in [polish.md](polish.md#preservation-and-completed-review);
-acknowledge context and meaning review with `check_suggestions.py --language pl
---reviewed` after resolving confirmed defects and recording protections. Treat every `pl_*` phrase hit as a candidate; protect valid literal,
-quoted, technical, modal and register-dependent uses after context review.
-Review code and quotations against the source even when the scanner masks them.
-ASCII Polish follows the same review and preservation branch. Matching maps
-Polish letters one-to-one without changing the source. Bounded inflections stay
-soft candidates. Local greeting, instruction, role-definition and legal-notice
-protections apply only to the matched phrase; inspect the rest of the passage.
-Infer register from the source and medium. Ambiguous uses remain candidates
-for agent review; preserve conditions, obligations and voice.
-Report English Flesch, structure, silhouette, rubric thresholds and voice scores
-as unavailable for Polish. Skip those gates, structure-climb and voice tooling
-for this branch. Never normalize numbers or typography as an automatic repair.
-Polish strict output reports preservation warnings and review decisions rather
-than an English grade or a 32/40 pass. English validation remains below.
-
-## Validation
+## English validation
 
 After every rewrite or voiced draft, run:
 
@@ -115,11 +109,9 @@ python3 scripts/diff_check.py original.txt transformed.txt
 ```
 
 Block preservation loss, introduced hard or `anti_slop_register` hits,
-unjustified structural damage, corroborated or hard silhouette damage, staccato,
-and strict-mode scores below 32/40. Use preservation `--strict` for legal,
-medical, security, or scientific text. Preexisting soft cadence and
-uncorroborated soft silhouette warnings are advisory.
-
-For remaining structure damage, pass exact findings to
-`evals/run_structure_climb.py`. Re-read negations, conditions, scope, certainty,
-and party relationships.
+unjustified structural damage, corroborated or hard silhouette damage,
+staccato and strict-mode scores below 32/40. Use preservation `--strict` for
+legal, medical, security or scientific text. Preexisting soft cadence and
+uncorroborated soft silhouette warnings are advisory. For remaining structure
+damage, pass exact findings to `evals/run_structure_climb.py`. Re-read
+negations, conditions, scope, certainty and party relationships.
