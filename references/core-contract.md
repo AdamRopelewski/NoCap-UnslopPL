@@ -19,6 +19,18 @@ images, contrasts, cadence, summaries and clear sentences. Soft cadence and
 document-shape scores alone never authorize edits. Confirm a finding only when
 the defect is clearer than the case for preservation; preserve uncertain spans.
 
+Review disclaimers, attribution phrases and source notices across the document,
+including introductions, headings, tables and footers. Attribution and scope
+established for a document or section remain preserved when they clearly cover
+the edited claim. Delete repeated reminders when the retained context preserves
+the source, speaker, evidential status, uncertainty and version or time scope.
+This includes generic warnings about later versions when they merely restate
+an established time scope. Preserve distinctions between speakers, source
+claims and editorial conclusions, and limitations specific to a claim or test.
+Keep repetition serving sections intended for separate distribution or a
+required notice. Source provenance alone leaves individual claims' evidential
+status undetermined. Confirm redundancy by checking what survives deletion.
+
 Judge claims from the source alone. Do not infer truth from outside knowledge
 or the date. Missing proof alone leaves plans, offers, future dates, promotions,
 technical terms, literal phrases and attributed claims intact. Compare the
